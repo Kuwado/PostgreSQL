@@ -1,0 +1,136 @@
+--Trigger hạn đăng ký thẻ
+CREATE OR REPLACE FUNCTION update_r_exdate()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.r_exdate := NEW.register_day + INTERVAL '1 year';
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+
+--Tìm thông tin sách theo tên
+CREATE TRIGGER update_r_exdate_trigger
+BEFORE INSERT OR UPDATE ON cards
+FOR EACH ROW
+EXECUTE FUNCTION update_r_exdate();
+
+CREATE OR REPLACE FUNCTION search_books(
+    p_book_name VARCHAR
+)
+RETURNS VOID AS $$
+DECLARE
+    book_record RECORD;
+	author_record RECORD;
+	category_record RECORD;
+BEGIN
+    FOR book_record IN
+        SELECT *
+        FROM books b
+        WHERE b.book_name ILIKE '%' || p_book_name || '%'
+         
+    LOOP
+        RAISE NOTICE 'Book ID: %, Book Name: %, Quantity: %, Location: %, Publishing_year: %, Language: %',
+                     book_record.book_id, book_record.book_name, book_record.quantity,
+                     book_record.location, book_record.publishing_year, book_record.language;
+		RAISE NOTICE 'Authors: ';
+		FOR author_record IN
+		SELECT a.*
+		FROM authors a
+		JOIN compose c ON c.author_id = a.author_id
+		WHERE c.book_id = book_record.book_id
+			LOOP 
+				RAISE NOTICE '%', CONCAT(author_record.a_first_name, ' ', author_record.a_last_name);
+			END LOOP;
+			
+		RAISE NOTICE 'Categories: ';
+		FOR category_record IN
+		SELECT c.*
+		FROM categories c
+		JOIN classify cl ON c.category_id = cl.category_id
+		WHERE cl.book_id = book_record.book_id
+			LOOP 
+				RAISE NOTICE '%', category_record.category_name;
+			END LOOP;
+		
+	END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+--Hàm tìm sách theo tên tác giả
+CREATE OR REPLACE FUNCTION search_book_by_author(
+    p_author_name VARCHAR
+)
+RETURNS VOID AS $$
+DECLARE
+    book_record RECORD;
+	author_record RECORD;
+	category_record RECORD;
+BEGIN
+    FOR book_record IN
+		SELECT b.*, a.*
+       	FROM books b
+    	JOIN compose c ON b.book_id = c.book_id
+    	JOIN authors a ON c.author_id = a.author_id
+    	WHERE CONCAT(a.a_first_name, ' ', a.a_last_name) ILIKE '%' || p_author_name || '%'
+    LOOP
+		RAISE NOTICE 'Cac cuon sach cua tac gia % la: ', CONCAT(book_record.a_first_name, ' ', book_record.a_last_name);
+	
+        RAISE NOTICE 'Book ID: %, Book Name: %, Quantity: %, Location: %, Publishing_year: %, Language: %',
+                     book_record.book_id, book_record.book_name, book_record.quantity,
+                     book_record.location, book_record.publishing_year, book_record.language;
+			
+		RAISE NOTICE 'Categories: ';
+		FOR category_record IN
+		SELECT c.*
+		FROM categories c
+		JOIN classify cl ON c.category_id = cl.category_id
+		WHERE cl.book_id = book_record.book_id
+			LOOP 
+				RAISE NOTICE '%', category_record.category_name;
+			END LOOP;
+		
+	END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+--Hàm tìm sách theo thể loại
+CREATE OR REPLACE FUNCTION search_book_by_category(
+    p_category_name VARCHAR
+)
+RETURNS VOID AS $$
+DECLARE
+    book_record RECORD;
+	author_record RECORD;
+	category_record RECORD;
+BEGIN
+    FOR book_record IN
+		SELECT b.*, a.*
+       	FROM books b
+    	JOIN classify c ON b.book_id = c.book_id
+    	JOIN categories a ON c.category_id = a.category_id
+    	WHERE a.category_name ILIKE '%' || p_category_name || '%'
+    LOOP
+		RAISE NOTICE 'Cac cuon sach có the loai % la: ', book_record.category_name;
+	
+        RAISE NOTICE 'Book ID: %, Book Name: %, Quantity: %, Location: %, Publishing_year: %, Language: %',
+                     book_record.book_id, book_record.book_name, book_record.quantity,
+                     book_record.location, book_record.publishing_year, book_record.language;
+			
+		RAISE NOTICE 'Authors: ';
+		FOR author_record IN
+		SELECT a.*
+		FROM authors a
+		JOIN compose c ON c.author_id = a.author_id
+		WHERE c.book_id = book_record.book_id
+			LOOP 
+				RAISE NOTICE '%', CONCAT(author_record.a_first_name, ' ', author_record.a_last_name);
+			END LOOP;
+		
+	END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+
+

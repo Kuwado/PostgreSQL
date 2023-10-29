@@ -1,0 +1,103 @@
+---------------------JOIN--------------------
+
+1. Viết truy vấn đưa ra( location_id, street_address, city, state_province, country_name) của tất cả departments
+
+SELECT DISTINCT d.location_id, l.street_address, l.city, l.state_province, c.country_name
+	FROM departments d
+	JOIN locations l ON d.location_id = l.location_id
+	JOIN countries c ON l.country_id = c.country_id;
+
+2. Tìm họ tên, department_id và department_name của các nhân viên trong employees.
+
+SELECT e.first_name||' '||e.last_name AS "full_name", e.department_id, d.department_name
+	FROM employees e
+	JOIN departments d ON e.department_id  = d.department_id;
+
+3. Tìm họ tên, job, department_id và department_name của tất cả nhân viên làm việc tại LONDON.
+
+SELECT  e.first_name||' '||e.last_name AS "full_name", j.job_title, e.department_id, d.department_name, l.city
+	FROM employees e
+	JOIN departments d ON d.department_id = e.department_id
+	JOIN jobs j ON j.job_id = e.job_id
+	JOIN locations l ON d.location_id = l.location_id
+	WHERE l.city = 'London';
+
+4. Tìm employee_id, last_name, manager_id và last_name của quản lý nhân viên đó.
+
+SELECT e.employee_id, e.last_name, e.manager_id, ee.last_name AS "manager_last_name"
+	FROM employees e
+	JOIN employees ee ON e.manager_id = ee.employee_id;
+
+5. Tìm họ tên, hire_date của nhan viên được tuyển dụng sau ngày nhân viên "Jones" được tuyển.
+
+SELECT  first_name||' '||last_name AS "full_name", hire_date
+	FROM employees
+	WHERE hire_date > ( SELECT max(hire_date)
+  	FROM employees
+  	WHERE last_name = 'Jones');
+
+6. Đưa ra department_name và số nhân viên trong từng department.
+
+SELECT d.department_name, COUNT(e.employee_id) AS "employee_count"
+	FROM departments d
+	JOIN employees e ON d.department_id = e.department_id
+	GROUP BY d.department_name;
+
+7. Đưa ra employee_id, job_title, số ngày làm việc tính từ ngày bắt đầu đến ngày kết thúc cho tất cả công việc có department_id là 90.
+
+SELECT  jh.employee_id, j.job_title, jh.end_date - jh.start_date AS "time"
+	FROM job_history jh
+	JOIN employees e ON e.employee_id = jh.employee_id 
+	JOIN jobs j ON j.job_id = jh.job_id
+	WHERE jh.department_id = 90;
+
+8. Viết truy vấn đưa ra department_id, department_name và họ tên của quản lý.
+
+SELECT DISTINCT d.department_id, d.department_name, ee.first_name||' '||ee.last_name AS "manager_name"
+	FROM employees e
+	JOIN departments d ON d.department_id = e.department_id
+	JOIN employees ee ON ee.employee_id = d.manager_id;
+
+9. Viết truy vấn đưa ra department_name, manager_name và city
+
+SELECT d.department_name, e.first_name||' '||e.last_name AS "manager_name", l.city
+FROM departments d
+	JOIN employees e ON e.employee_id = d.manager_id
+	JOIN locations l ON l.location_id = d.location_id;
+
+10. Đưa ra job_title và mức lương trung bình của nhân viên ứng với job_title đó
+
+SELECT job_title, ROUND((max_salary + min_salary)/2,2) AS "AVG_salary"
+	FROM jobs;
+
+11. Đưa ra job_title, họ tên, độ chênh lệch với mức lương thấp nhất của jobs đó
+
+SELECT j.job_title, e.first_name||' '||e.last_name AS "full_name", ROUND((e.salary - j.min_salary),2) AS "difference"
+	FROM employees e
+	JOIN jobs j ON j.job_id = e.job_id
+	ORDER BY job_title ASC;	
+
+12. Đưa ra job_history của nhân viên có mức lương hiện tại > 10000.
+
+SELECT jh.*, e.salary
+	FROM job_history jh
+	JOIN employees e ON e.employee_id = jh.employee_id
+	WHERE e.salary > 10000;
+
+13. Đưa ra department_name, họ tên, hire_date, salary của manager có kinh nghiệm hơn 15 năm
+
+SELECT DISTINCT d.department_name, ee.first_name||' '||ee.last_name AS "manager_name", ee.hire_date, ee.salary, ee.employee_id 
+	FROM employees e 
+	JOIN departments d ON d.department_id = e.department_id
+	JOIN employees ee ON ee.employee_id = e.manager_id
+	WHERE ee.employee_id NOT IN (SELECT employee_id FROM job_history);
+	
+
+
+
+
+
+
+
+
+

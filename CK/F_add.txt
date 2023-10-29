@@ -1,0 +1,296 @@
+-- Tạo hàm thêm sách
+CREATE OR REPLACE FUNCTION add_book(
+    p_book_id INT,
+    p_book_name VARCHAR(100),
+    p_location VARCHAR(30),
+    p_quantity INT,
+    p_publishing_year VARCHAR(4),
+    p_language VARCHAR(20)
+) RETURNS VOID AS $$
+BEGIN
+    -- Kiểm tra xem sách đã tồn tại chưa
+    IF EXISTS(SELECT 1 FROM books WHERE book_id = p_book_id) THEN
+        RAISE EXCEPTION 'Book with ID % already exists.', p_book_id;
+    END IF;
+    IF EXISTS(SELECT 1 FROM books WHERE book_name = p_book_name) THEN
+        RAISE EXCEPTION 'Book with Name % already exists.', p_book_name;
+    END IF;
+    
+    -- Thực hiện thêm sách vào bảng books
+    INSERT INTO books (book_id, book_name, location, quantity, publishing_year, language)
+    VALUES (p_book_id, p_book_name, p_location, p_quantity, p_publishing_year, p_language);
+END;
+$$ LANGUAGE plpgsql;
+
+-- Tạo hàm cập nhật sách
+CREATE OR REPLACE FUNCTION update_book(
+    p_book_id INT,
+    p_new_book_name VARCHAR(100),
+    p_new_location VARCHAR(30),
+    p_new_quantity INT,
+    p_new_publishing_year VARCHAR(4),
+    p_new_language VARCHAR(20)
+) RETURNS VOID AS $$
+BEGIN
+    -- Kiểm tra xem sách tồn tại hay không
+    IF NOT EXISTS (SELECT 1 FROM books WHERE book_id = p_book_id) THEN
+        RAISE EXCEPTION 'Book with ID % does not exist.', p_book_id;
+    END IF;
+    
+    -- Cập nhật thông tin sách
+    UPDATE books SET
+        book_name = p_new_book_name,
+        location = p_new_location,
+        quantity = p_new_quantity,
+        publishing_year = p_new_publishing_year,
+        language = p_new_language
+    WHERE book_id = p_book_id;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Tạo hàm xóa sách
+CREATE OR REPLACE FUNCTION delete_book(p_book_id INT) RETURNS VOID AS $$
+BEGIN
+    -- Kiểm tra xem sách tồn tại hay không
+    IF NOT EXISTS (SELECT 1 FROM books WHERE book_id = p_book_id) THEN
+        RAISE EXCEPTION 'Book with ID % does not exist.', p_book_id;
+    END IF;
+    
+    -- Xóa sách
+    DELETE FROM books WHERE book_id = p_book_id;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- Tạo hàm thêm người dùng
+CREATE OR REPLACE FUNCTION add_user(
+    p_user_id INT,
+    p_first_name VARCHAR(30),
+    p_last_name VARCHAR(30),
+    p_date_of_birth DATE,
+    p_gmail VARCHAR(30),
+    p_phone_number VARCHAR(30),
+    p_address VARCHAR(100),
+    p_cccd VARCHAR(20)
+) RETURNS VOID AS $$
+BEGIN
+    -- Kiểm tra xem người dùng đã tồn tại chưa
+    IF EXISTS(SELECT 1 FROM users WHERE user_id = p_user_id) THEN
+        RAISE EXCEPTION 'User with ID % already exists.', p_user_id;
+    END IF;
+    IF EXISTS(SELECT 1 FROM users WHERE u_gmail = p_gmail) THEN
+        RAISE EXCEPTION 'User with gmail % already exists.', p_gmail;
+    END IF;
+    IF EXISTS(SELECT 1 FROM users WHERE u_phone_number = p_phone_number) THEN
+        RAISE EXCEPTION 'User with phone_number % already exists.', p_phone_number;
+    END IF;
+    IF EXISTS(SELECT 1 FROM users WHERE cccd = p_cccd) THEN
+        RAISE EXCEPTION 'User with cccd % already exists.', p_cccd;
+    END IF;
+    
+    
+    -- Thực hiện thêm người dùng vào bảng users
+    INSERT INTO users (user_id, u_first_name, u_last_name, u_date_of_birth, u_gmail, u_phone_number, address, cccd)
+    VALUES (p_user_id, p_first_name, p_last_name, p_date_of_birth, p_gmail, p_phone_number, p_address, p_cccd);
+END;
+$$ LANGUAGE plpgsql;
+
+-- Tạo hàm cập nhật người dùng
+CREATE OR REPLACE FUNCTION update_user(
+    p_user_id INT,
+    p_new_first_name VARCHAR(30),
+    p_new_last_name VARCHAR(30),
+    p_new_date_of_birth DATE,
+    p_new_address VARCHAR(100)
+) RETURNS VOID AS $$
+BEGIN
+    -- Kiểm tra xem người dùng tồn tại hay không
+    IF NOT EXISTS (SELECT 1 FROM users WHERE user_id = p_user_id) THEN
+        RAISE EXCEPTION 'User with ID % does not exist.', p_user_id;
+    END IF;
+    
+    -- Cập nhật thông tin người dùng
+    UPDATE users SET
+        u_first_name = p_new_first_name,
+        u_last_name = p_new_last_name,
+        u_date_of_birth = p_new_date_of_birth,
+        address = p_new_address
+    WHERE user_id = p_user_id;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Tạo hàm thêm nhân viên
+CREATE OR REPLACE FUNCTION add_staff(
+    p_staff_id INT,
+    p_first_name VARCHAR(30),
+    p_last_name VARCHAR(30),
+    p_date_of_birth DATE,
+    p_gmail VARCHAR(30),
+    p_phone_number VARCHAR(30)
+) RETURNS VOID AS $$
+BEGIN
+    -- Kiểm tra xem nhân viên đã tồn tại hay chưa
+    IF EXISTS(SELECT 1 FROM staffs WHERE staff_id = p_staff_id) THEN
+        RAISE EXCEPTION 'Staff with ID % already exists.', p_staff_id;
+    END IF;
+        IF EXISTS(SELECT 1 FROM staffs WHERE s_gmail = p_gmail) THEN
+        RAISE EXCEPTION 'Staff with ID % already exists.', p_staff_id;
+    END IF;
+    IF EXISTS(SELECT 1 FROM staffs WHERE s_phone_number = p_staff_id) THEN
+        RAISE EXCEPTION 'Staff with ID % already exists.', p_staff_id;
+    END IF;
+
+    -- Thực hiện thêm nhân viên vào bảng staffs
+    INSERT INTO staffs (staff_id, s_first_name, s_last_name, s_date_of_birth, s_gmail, s_phone_number)
+    VALUES (p_staff_id, p_first_name, p_last_name, p_date_of_birth, p_gmail, p_phone_number);
+END;
+$$ LANGUAGE plpgsql;
+
+--Tạo hàm thêm tác giả
+CREATE OR REPLACE FUNCTION add_author(
+    p_author_id INT,
+    p_first_name VARCHAR(30),
+    p_last_name VARCHAR(30)
+) RETURNS VOID AS $$
+BEGIN
+    -- Thực hiện kiểm tra trước khi thêm dữ liệu
+    IF EXISTS (SELECT 1 FROM authors WHERE author_id = p_author_id) THEN
+        RAISE EXCEPTION 'Author with ID % already exists.', p_author_id;
+    END IF;
+    
+    -- Thực hiện thêm dữ liệu vào bảng authors
+    INSERT INTO authors (author_id, a_first_name, a_last_name)
+    VALUES (p_author_id, p_first_name, p_last_name);
+END;
+$$ LANGUAGE plpgsql;
+
+--Tạo hàm update tác giả
+CREATE OR REPLACE FUNCTION update_author(
+    p_author_id INT,
+    p_new_first_name VARCHAR(30),
+    p_new_last_name VARCHAR(30)
+) RETURNS VOID AS $$
+BEGIN
+    -- Kiểm tra xem tác giả tồn tại hay không
+    IF NOT EXISTS (SELECT 1 FROM authors WHERE author_id = p_author_id) THEN
+        RAISE EXCEPTION 'Author with ID % does not exist.', p_author_id;
+    END IF;
+    
+    -- Cập nhật thông tin tác giả
+    UPDATE authors SET
+        a_first_name = p_new_first_name,
+        a_last_name = p_new_last_name
+    WHERE author_id = p_author_id;
+END;
+$$ LANGUAGE plpgsql;
+
+--Tạo hàm xóa tác giả
+CREATE OR REPLACE FUNCTION delete_author(p_author_id INT) RETURNS VOID AS $$
+BEGIN
+    -- Kiểm tra xem tác giả tồn tại hay không
+    IF NOT EXISTS (SELECT 1 FROM authors WHERE author_id = p_author_id) THEN
+        RAISE EXCEPTION 'Author with ID % does not exist.', p_author_id;
+    END IF;
+    
+    -- Xóa tác giả
+    DELETE FROM authors WHERE author_id = p_author_id;
+END;
+$$ LANGUAGE plpgsql;
+
+--Tạo hàm thêm thể loại
+CREATE OR REPLACE FUNCTION add_category(
+    p_category_id INT,
+    p_category_name VARCHAR(100)
+) RETURNS VOID AS $$
+BEGIN
+    -- Kiểm tra xem thể loại đã tồn tại hay chưa
+    IF EXISTS (SELECT 1 FROM categories WHERE category_id = p_category_id) THEN
+        RAISE EXCEPTION 'Category with ID % already exists.', p_category_id;
+    END IF;
+    
+    -- Thực hiện thêm thể loại vào bảng categories
+    INSERT INTO categories (category_id, category_name)
+    VALUES (p_category_id, p_category_name);
+END;
+$$ LANGUAGE plpgsql;
+
+--Tạo hàm update thể loại
+CREATE OR REPLACE FUNCTION update_category(
+    p_category_id INT,
+    p_new_category_name VARCHAR(100)
+) RETURNS VOID AS $$
+BEGIN
+    -- Kiểm tra xem thể loại tồn tại hay không
+    IF NOT EXISTS (SELECT 1 FROM categories WHERE category_id = p_category_id) THEN
+        RAISE EXCEPTION 'Category with ID % does not exist.', p_category_id;
+    END IF;
+    
+    -- Cập nhật thông tin thể loại
+    UPDATE categories SET
+        category_name = p_new_category_name
+    WHERE category_id = p_category_id;
+END;
+$$ LANGUAGE plpgsql;
+
+--Tạo hàm xóa thể loại
+CREATE OR REPLACE FUNCTION delete_category(p_category_id INT) RETURNS VOID AS $$
+BEGIN
+    -- Kiểm tra xem thể loại tồn tại hay không
+    IF NOT EXISTS (SELECT 1 FROM categories WHERE category_id = p_category_id) THEN
+        RAISE EXCEPTION 'Category with ID % does not exist.', p_category_id;
+    END IF;
+    
+    -- Xóa thể loại
+    DELETE FROM categories WHERE category_id = p_category_id;
+END;
+$$ LANGUAGE plpgsql;
+
+--Hàm liên kết tác giả và sách
+CREATE OR REPLACE FUNCTION add_compose(
+    p_author_id INT,
+    p_book_id INT
+) RETURNS VOID AS $$
+BEGIN
+    -- Thêm dữ liệu vào bảng compose
+    INSERT INTO compose (author_id, book_id)
+    VALUES (p_author_id, p_book_id);
+END;
+$$ LANGUAGE plpgsql;
+
+--Hàm liên kết sách và thể loại
+CREATE OR REPLACE FUNCTION add_classify(
+    p_book_id INT,
+    p_category_id INT
+) RETURNS VOID AS $$
+BEGIN
+    -- Thêm dữ liệu vào bảng classify
+    INSERT INTO classify (book_id, category_id)
+    VALUES (p_book_id, p_category_id);
+END;
+$$ LANGUAGE plpgsql;
+
+--Hàm thêm dữ liệu bảng card
+CREATE OR REPLACE FUNCTION add_card(
+    p_card_id INT,
+    p_user_id INT,
+    p_register_day DATE
+) RETURNS VOID AS $$
+BEGIN
+    INSERT INTO cards (card_id, user_id, register_day)
+    VALUES (p_card_id, p_user_id, p_register_day);
+END;
+$$ LANGUAGE plpgsql;
+
+--Hàm cập nhật thẻ
+CREATE OR REPLACE FUNCTION update_card(
+    p_card_id INT
+) RETURNS VOID AS $$
+BEGIN
+    UPDATE cards
+    SET register_day = CURRENT_DATE
+    WHERE card_id = p_card_id;
+END;
+$$ LANGUAGE plpgsql;
+
+
+

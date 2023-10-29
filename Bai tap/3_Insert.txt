@@ -1,0 +1,166 @@
+---------------------INSERT--------------------
+
+CREATE TABLE countries (
+	country_id VARCHAR(2),
+	country_name VARCHAR(40),
+	region_id DECIMAL(10,0)
+);
+
+
+1. Thêm 1 bản ghi với giá trị tất cả các cột do bạn tự chọn vào bảng countries.
+
+INSERT INTO countries (country_id, country_name, region_id)
+VALUES
+	('01', 'Viet Nam', 100);
+
+2. Thêm 1 bản ghi với giá trị ở 2 cột ( country_id, country_name ) của bảng countries.
+
+INSERT INTO countries (country_id, country_name)
+VALUES
+	('02', 'Lao');
+
+3. Tạo bản sao country_new của bảng countries với cấu trúc và toàn bộ dữ liệu của bảng countries.
+
+CREATE TABLE country_new AS
+	SELECT * FROM countries;
+
+4. Thêm vào 1 bản ghi với trường region_id là NULL.
+
+INSERT INTO countries (region_id) 
+VALUES 
+	(NULL);
+
+5. Thêm vào 3 bản ghi trong cùng một truy vấn INSERT vào bảng countries.
+
+INSERT INTO countries (country_id, country_name, region_id)
+VALUES
+	('04', 'My', 321),
+	('05', 'Anh', 456),
+	('06', 'Phap', 102);
+
+6. Thêm vào bảng countries tất cả các dòng từ bảng country_new.
+
+INSERT INTO countries
+SELECT * FROM country_new;
+
+7. Tạo bảng countries và viết câu lệnh INSERT sao tro trường country_id là tự động tăng mà không cần đưa vào câu lệnh INSERT.
+
+CREATE TABLE countries (
+	country_id SERIAL,
+	country_name VARCHAR(40),
+	region_id DECIMAL(10,0)
+);
+
+INSERT INTO countries ( country_name, region_id )
+VALUES
+	('Trung Quoc', 145),
+	('Viet Nam', 235);
+	
+8. Tạo bảng countries và viết câu lệnh INSERT sao cho country_id có tính duy nhất trong bảng, country_name có giá trị mặc định là 'N/A' nếu không được chỉ định trong câu lệnh INSERT.
+
+CREATE TABLE countries (
+    	country_id INT UNIQUE,
+    	country_name VARCHAR(40) DEFAULT 'N/A',
+	region_id INT
+);
+
+INSERT INTO countries ( country_id, region_id )
+VALUES
+	(14, 145),
+	(15, 235);
+
+9. Tạo bảng employees và viết câu lệnh INSERT sao cho cặp (department_id và manager_id) phải có ràng buộc tồn tại trong bảng departments.
+CREATE TABLE departments (
+	department_id INT,
+	manager_id INT,
+	CONSTRAINT pk_departments PRIMARY KEY (department_id, manager_id)
+);
+
+CREATE TABLE employees (
+    	employee_id SERIAL PRIMARY KEY,
+    	employee_name VARCHAR(255),
+    	department_id INT,
+    	manager_id INT,
+    	CONSTRAINT fk_department FOREIGN KEY (department_id, manager_id) 
+	REFERENCES depart (department_id, manager_id)
+);
+
+INSERT INTO departments (department_id, manager_id) 
+VALUES 
+	( 1, 2);
+
+INSERT INTO employees (employee_name, department_id, manager_id) 
+VALUES 
+	('John', 1, 2);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

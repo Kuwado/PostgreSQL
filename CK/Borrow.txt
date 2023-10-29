@@ -1,0 +1,230 @@
+--Thêm dữ liệu vào borrow_return
+CREATE OR REPLACE FUNCTION add_borrow_return(
+    p_borrow_id INT,
+    p_card_id INT,
+    month INT,
+    p_note VARCHAR(30),
+    p_staff_id INT
+)
+RETURNS VOID AS $$
+
+DECLARE
+    p_borrow_day DATE;
+    p_expiration_date DATE;
+
+BEGIN
+    IF EXISTS (SELECT 1 FROM cards WHERE card_id = p_card_id AND r_exdate >= CURRENT_DATE ) 
+THEN
+	IF NOT EXISTS (SELECT 1 FROM late WHERE card_id = p_card_id) THEN
+    		-- Lấy ngày hiện tại
+   		p_borrow_day := CURRENT_DATE;
+
+    		-- Tính toán expiration_date
+    		p_expiration_date := p_borrow_day + INTERVAL '1 month' * month;
+
+    		-- Thêm dữ liệu
+        	INSERT INTO borrow_return (borrow_id, card_id, borrow_day, expiration_date, note, staff_id)
+        	VALUES (p_borrow_id, p_card_id, p_borrow_day, p_expiration_date, p_note, p_staff_id);
+	ELSE
+        	RAISE EXCEPTION 'thẻ có id là % đang bị cấm do trễ hạn, vui lòng nộp phạt', p_card_id;
+	END IF;
+    ELSE
+        RAISE EXCEPTION 'thẻ có id là % đã hết hạn sử dụng, vui lòng nạp tiền', p_card_id;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+--Hàm trả sách
+CREATE OR REPLACE FUNCTION return_book(
+    b_id INT)
+RETURNS VOID AS $$
+DECLARE
+    r_day DATE;
+    v_expiration_date DATE;
+    v_return_day DATE;
+BEGIN 
+    -- Lấy ngày hết hạn từ bảng borrow_return
+    SELECT expiration_date, return_day
+    INTO v_expiration_date, v_return_day
+    FROM borrow_return
+    WHERE borrow_id = b_id;
+
+    IF v_expiration_date >= CURRENT_DATE AND v_return_day IS NULL THEN
+        r_day := CURRENT_DATE;
+        UPDATE borrow_return
+        SET return_day = r_day, note = 'Đã trả sách đúng hạn'
+        WHERE borrow_id = b_id;
+        DELETE FROM borrow
+        WHERE borrow_id = b_id;
+    ELSIF v_expiration_date < CURRENT_DATE AND v_return_day IS NULL THEN
+        RAISE EXCEPTION 'Đã trễ hạn, vui lòng nộp phạt';
+    ELSIF v_return_day IS NOT NULL THEN
+        RAISE EXCEPTION 'Sách đã được trả';
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+--Hàm liệt kê sách mượn
+CREATE OR REPLACE FUNCTION borrow_book(p_borrow_id INT, p_book_id INT, p_borrow_quantity INT)
+RETURNS VOID AS $$
+DECLARE
+    available_quantity INT;
+BEGIN
+    -- Lấy số lượng sách còn lại trong bảng books
+    SELECT quantity INTO available_quantity
+    FROM books
+    WHERE book_id = p_book_id;
+
+    -- Kiểm tra số lượng sách còn lại
+    IF available_quantity >= p_borrow_quantity THEN
+        -- Sách còn đủ để mượn, tiến hành thêm dữ liệu vào bảng borrow
+        INSERT INTO borrow (borrow_id, book_id, borrow_quantity)
+        VALUES (p_borrow_id, p_book_id, p_borrow_quantity);
+    ELSE
+        RAISE EXCEPTION 'Số lượng sách không đủ để mượn.';
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+--Trigger số lượng sách
+
+CREATE OR REPLACE FUNCTION update_book_quantity()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Giảm số lượng sách đã mượn từ bảng books
+    UPDATE books
+    SET quantity = quantity - NEW.borrow_quantity
+    WHERE book_id = NEW.book_id;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER borrow_book_trigger
+AFTER INSERT ON borrow
+FOR EACH ROW
+EXECUTE FUNCTION update_book_quantity();
+
+--Trigger trả lại sách nếu xóa
+
+CREATE OR REPLACE FUNCTION restore_book_quantity()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Tăng số lượng sách đã trả lại trong bảng books
+    UPDATE books
+    SET quantity = quantity + OLD.borrow_quantity
+    WHERE book_id = OLD.book_id;
+
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER return_book_trigger
+AFTER DELETE ON borrow
+FOR EACH ROW
+EXECUTE FUNCTION restore_book_quantity();
+
+-- Tạo Trigger để sao chép dữ liệu từ bảng borrow sang bảng borrow_copy
+CREATE OR REPLACE FUNCTION copy_borrow_to_borrow_copy()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        INSERT INTO borrow_copy
+        SELECT NEW.*;
+    ELSIF (TG_OP = 'UPDATE') THEN
+        UPDATE borrow_copy
+        SET
+            book_id = NEW.book_id,
+            borrow_quantity = NEW.borrow_quantity
+        WHERE borrow_id = NEW.borrow_id;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER borrow_copy_trigger
+AFTER INSERT OR UPDATE ON borrow
+FOR EACH ROW
+EXECUTE FUNCTION copy_borrow_to_borrow_copy();
+
+--Hàm kiểm tra trễ hạn
+CREATE OR REPLACE FUNCTION check_late()
+RETURNS VOID AS $$
+DECLARE
+    v_borrow_id INT;
+    v_expiration_date DATE;
+    v_borrow_quantity INT;
+    v_money MONEY;
+    v_card_id INT;
+BEGIN
+    -- Lấy danh sách các borrow_id, ngày hết hạn và tổng số lượng sách từ bảng borrow_return và borrow
+    FOR v_borrow_id, v_expiration_date, v_borrow_quantity, v_card_id IN
+        SELECT br.borrow_id, br.expiration_date, SUM(bo.borrow_quantity), br.card_id
+        FROM borrow_return br
+        JOIN borrow bo ON br.borrow_id = bo.borrow_id
+        WHERE br.return_day IS NULL AND br.expiration_date < CURRENT_DATE
+        GROUP BY br.borrow_id, br.expiration_date
+    LOOP
+      
+        -- Kiểm tra nếu sách đã trễ hạn, thực hiện các hành động tương ứng
+        RAISE NOTICE 'Sách với borrow_id % đã trễ hạn', v_borrow_id;
+
+    	IF NOT EXISTS (SELECT 1 FROM late WHERE borrow_id = v_borrow_id) THEN
+        	-- Tính toán số tiền phạt
+        	v_money := v_borrow_quantity * 50000;
+
+        	-- Thêm dữ liệu vào bảng late
+        	INSERT INTO late (borrow_id, money, card_id)
+        	VALUES (v_borrow_id, v_money, v_card_id);
+
+        	-- Cập nhật trạng thái trong bảng borrow_return
+        	UPDATE borrow_return
+ 	       	SET note = 'Đã trễ hạn'
+        	WHERE borrow_id = v_borrow_id;
+	END IF;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+--Hàm hoàn thành nộp phạt trễ hẹn
+CREATE OR REPLACE FUNCTION delete_late(p_borrow_id INT)
+RETURNS VOID AS $$
+BEGIN
+        DELETE FROM late
+        WHERE borrow_id = p_borrow_id;
+
+	UPDATE borrow_return
+	SET note = 'Trả sách trễ hạn', return_day = CURRENT_DATE
+	WHERE borrow_id = p_borrow_id;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

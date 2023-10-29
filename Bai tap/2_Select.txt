@@ -1,0 +1,127 @@
+---------------------SELECT--------------------
+
+
+1. Đưa ra (first_name, last_name) sử dụng alias "FIRST NAME", "LAST NAME".
+
+SELECT first_name AS "FIRST NAME", last_name AS "LAST NAME"
+	FROM employees;
+
+2. Lấy ra các department_id duy nhất trong bảng employees.
+
+SELECT DISTINCT department_id
+	FROM employees;
+
+3. Lấy ra chi tiết các thông tin được sắp xếp theo 'first_name' với thứ tự giảm dần.
+
+SELECT * FROM employees
+	ORDER BY first_name DESC;
+
+4. Đưa ra ( first_name, last_name) salary, PF của tất cả các nhân viên (PF là 15% của salary).
+
+SELECT first_name, last_name, salary, salary * 0.15 AS "PF"
+	FROM employees;
+
+5. Đưa ra employee_id, names (first_name, last_name) và salary theo thứ tự tăng dần của salary
+
+SELECT employee_id, first_name, last_name, salary
+	FROM employees
+	ORDER BY salary ASC;
+
+6. Lấy về tổng lương phải trả cho nhân viên.
+
+SELECT SUM(salary) AS total_salary
+	FROM employees;
+
+7. Lấy về mức lương cao nhất và thấp nhất.
+
+SELECT MAX(salary) AS "MAX SALARY", MIN(salary) AS "MIN SALARY"
+	FROM employees;
+
+8. Lấy về mức lương trung bình và số nhân viên trong bảng employees.
+
+SELECT AVG(salary) AS "Salary trung binh", COUNT(*) AS "So nhan vien"
+	FROM employees;
+
+9. Lấy về số nhân viên ứng với công ty.
+
+SELECT department_id AS "id cong ty", COUNT(employee_id) AS "so luong nhan vien"
+	FROM employees
+	GROUP BY department_id;
+
+10. Đưa ra số lượng các công việc.
+
+SELECT COUNT(distinct job_id) AS "so cong viec"
+	FROM employees;
+
+11. Lấy về firts_name trong bảng nhưng viết hoa.
+
+SELECT UPPER(first_name) AS "ho viet hoa"
+	FROM employees;
+
+12. Lấy về danh sách 3 ký tự đầu tiên của first_name
+
+SELECT LEFT(first_name, 3) AS "3 ky tu dau tien cua ho"
+	FROM employees;
+
+13. Viết truy vấn để tính 171*214+625
+
+SELECT 171*214+625 AS "ket qua" ;
+
+14. Viết truy vấn để lấy tên ghép từ first_name và last_name của các nhân viên.
+
+SELECT first_name || ' ' || last_name department_id AS full_name
+FROM employees;
+
+15. Lấy về first_name từ employees và xóa hết khoảng trắng ở 2 bên trái phải nếu có.
+
+SELECT TRIM(first_name) AS "trimmed_first_name"
+	FROM employees;
+
+16. Lấy về độ dài tên (first_name, last_name) từ bảng
+
+SELECT 	LENGTH(first_name) AS "lenghth_first", 
+	LENGTH(last_name) AS "length_last",
+	LENGTH(first_name||''||last_name) AS "length_all"
+	FROM employees;
+
+17. Kiểm tra nếu trong bảng có nhân viên có first_name chứa ký tự số.
+
+SELECT first_name AS "ho co ky tu so"
+	FROM employees
+	WHERE first_name ~ '[0-9]';
+
+18. Lấy về 10 dòng đầu tiên.
+
+SELECT * 
+	FROM employees
+	LIMIT 10;
+19. Lấy lương theo tháng (làm tròn 2 cs thập phân). Giả sử salary là lương 1 năm.
+
+SELECT first_name, last_name, ROUND(salary / 12, 2) AS monthly_salary
+	FROM employees;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

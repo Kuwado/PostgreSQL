@@ -1,0 +1,168 @@
+---------------------RESTRICTING AND SORTING--------------------
+
+
+1. Viết truy vấn để hiển thị tên (first_name, last_name) và lương cho tất cả nhân viên có lương không nằm trong khoảng từ $10.000 đến $15000.
+
+SELECT first_name||' '||last_name AS "ho ten", salary
+	FROM employees
+	WHERE salary NOT BETWEEN 10000 AND 15000;
+
+2. Viết truy vấn để hiển thị tên (first_name, last_name) và department_id của tất cả nhân viên có department_id là 30 hoặc 100 theo thứ tự tăng dần.
+
+SELECT first_name||' '||last_name AS "ho ten", department_id
+	FROM employees
+	WHERE department_id IN (30, 100)
+	ORDER BY department_id ASC;
+
+3. Viết truy vấn để hiển thị tên (first_name, last_name) và lương cho tất cả nhân viên có lương không nằm trong khoảng $10,000 đến $15,000 và thuộc bộ phận 30 hoặc 100
+
+SELECT first_name||' '||last_name AS "ho ten", salary, department_id
+	FROM employees
+	WHERE salary NOT BETWEEN 10000 AND 15000
+	AND department_id IN (30, 100);
+
+4. Viết truy vấn để hiển thị tên (first_name, last_name) và ngày thuê của tất cả nhân viên được thuê vào năm 1987.
+
+SELECT first_name||' '||last_name AS "ho ten", hire_date
+	FROM employees
+	WHERE EXTRACT(YEAR FROM hire_date) = 1987;
+
+5. Viết truy vấn để hiển thị first_name của tất cả nhân viên có cả "b" và "c" trong first_name.
+
+SELECT first_name
+	FROM employees
+	WHERE first_name LIKE '%b%' AND first_name LIKE '%c%';
+
+6. Viết truy vấn để hiển thị tên, công việc và lương cho tất cả nhân viên có công việc là Programmer hoặc Shipping Clerk và có mức lương không bằng $4.500, $10.000 hoặc $15.000
+
+SELECT  e.last_name, j.job_title, e.salary
+	FROM employees e
+	JOIN jobs j ON e.job_id = j.job_id
+	WHERE j.job_title IN ('Programmer', 'Shipping Clerk')
+	AND e.salary NOT IN (4500, 10000, 15000);
+
+7. Viết câu truy vấn để hiển thị tên của những nhân viên có tên dài đúng 6 ký tự.
+
+SELECT last_name
+	FROM employees
+	WHERE LENGTH(last_name) = 6;
+
+8. Viết truy vấn để hiển thị tên của nhân viên có ký tự thứ ba là 'e'.
+
+SELECT last_name
+	FROM employees
+	WHERE SUBSTRING(last_name, 3, 1) = 'e';
+
+9. Viết câu truy vấn để hiển thị các công việc/chức vụ có sẵn trong bảng nhân viên. 
+
+SELECT DISTINCT j.job_title
+	FROM employees e
+	JOIN jobs j ON e.job_id = j.job_id;
+
+10. Viết truy vấn để hiển thị tên (first_name, last_name), lương và PF (15% lương) của tất cả nhân viên.
+
+SELECT first_name||' '||last_name AS "ho ten", salary, 0.15*salary AS "PF"
+	FROM employees;
+
+11. Viết truy vấn để chọn tất cả bản ghi từ nhân viên có last_name là 'BLAKE', 'SCOTT', 'KING' và 'FORD'.
+
+SELECT *
+	FROM employees
+	WHERE last_name IN ('Blake', 'Scott', 'King', 'Ford');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

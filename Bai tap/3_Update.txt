@@ -1,0 +1,80 @@
+---------------------UPDATE--------------------
+
+
+
+1. Thay đổi giá trị cột email cho mọi bản ghi trong bảng employees về giá trị ‘not available’.
+
+UPDATE employees
+	SET email = 'not available';
+
+2. Thay đổi giá trị cột email thành ‘not available’ và cột commission_pct thành 0.10 cho tất cả bản ghi trong bảng employees.
+
+UPDATE employees
+	SET email = 'not available', 
+	commission_pct = 0.10;
+
+3. Thay đổi giá trị cột email thành ‘not available’ và cột commission_pct thành 0.10 cho tất cả bản ghi trong bảng employees mà thỏa mãn điều kiện department_id là 110.
+
+
+UPDATE employees
+	SET email = 'not available', 
+	commission_pct = 0.10
+	WHERE department_id = 110;
+
+4. Thay đổi giá trị cột email thành ‘not available’ cho bản ghi trong bảng employees mà department_id là 80 và commission_pct < 0.20%.
+
+
+UPDATE employees
+	SET email = 'not available'
+	WHERE department_id = 80
+	AND commission_pct < 0.20;
+
+5. Thay đổi cột email thành ‘not available” cho nhân viên trong bảng employees mà làm việc ở phòng ban ‘Accounting’.
+
+UPDATE employees
+	SET email = 'not available'
+	WHERE department_id IN (
+    		SELECT department_id
+    		FROM departments
+    		WHERE department_name = 'Accounting');
+
+6. Cập nhật salary cho nhân viên có ID là 105 lên 8000 nếu mức lương trước đó là ít hơn 5000
+
+UPDATE employees
+	SET salary = 8000
+	WHERE employee_id = '105' 
+	AND salary < 5000;
+
+7. Cập nhật job_id thành ‘SH_CLERK’ cho nhân viên có ID là 118 nếu nhân viên đó thuộc department id là 30 và job_id hiện tại không bắt đầu với ‘SH’.
+
+UPDATE employees
+	SET job_id = 'SH_CLERK'
+	WHERE employee_id = '118'
+  	AND department_id = 30
+  	AND NOT job_id LIKE 'SH%';
+
+8. Viết một câu truy vấn duy nhất tăng mức lương của những nhân viên thuộc department có id là 40, 90 và 110 với điều kiện tăng 25% cho department id là 40 15% cho department id là 90 và 10% cho department id là 110. Các phòng ban còn lại giữ nguyên.
+
+
+UPDATE employees
+	SET salary = CASE 
+    		WHEN department_id = 40 THEN salary * 1.25
+    		WHEN department_id = 90 THEN salary * 1.15
+    		WHEN department_id = 110 THEN salary * 1.10
+    		ELSE salary
+    	END
+	WHERE department_id IN (40, 90, 110);
+
+9. Tăng mức lương minimum và maximum của nhân viên mà job id là “PU_CLERK” lên thêm 2000 đơn vị đồng thời lương salary của các nhân viên này tăng 20% và commision_pct tăng thêm 0.10 đơn vị.
+
+UPDATE jobs
+	SET min_salary = min_salary + 2000,
+   	    max_salary = max_salary + 2000
+	WHERE job_id = 'PU_CLERK';
+
+UPDATE employees
+	SET salary = salary * 1.2,
+    	    commission_pct = commission_pct + 0.10
+	WHERE job_id = 'PU_CLERK';
+
+

@@ -1,0 +1,158 @@
+---------------------AGGREGATE FUNCTION--------------------
+
+1. Đưa ra số lượng các job trong bảng employees.
+
+SELECT COUNT(DISTINCT job_id) AS "Count_job"
+	FROM employees;
+
+2. Đưa ra tổng mức lương phải trả cho nhân viên trong bảng employees.
+
+SELECT ROUND(SUM(salary),2) AS "SUM_Salary"
+	FROM employees;
+
+3. Đưa ra mức lương thấp nhất trong bảng employees.
+
+SELECT ROUND(MIN(salary),2) AS "MIN_Salary"
+	FROM employees;
+
+4. Đưa ra mức lương thấp nhất của một nhân viên là Programmer.
+
+SELECT ROUND(MIN(e.salary),2) AS "MIN_Salary"
+	FROM employees e
+	JOIN jobs j ON j.job_id = e.job_id
+	WHERE j.job_title = 'Programmer';
+
+5. Đưa ra mức lương trung bình và số lượng nhân viên làm việc cho deoartment_id là 90.
+
+SELECT ROUND(AVG(salary),2) AS "avg_salary", COUNT(employee_id) AS "count_employee"
+	FROM employees
+	WHERE department_id = 90;
+
+6. Đưa ra mức lương cao nhất, thấp nhất, tổng và trung bình của tất cả nhân viên.
+
+SELECT  ROUND(MAX(salary),2) AS "max_salary",
+	ROUND(MIN(salary),2) AS "min_salary",
+	ROUND(SUM(salary),2) AS "sum_salary",
+	ROUND(AVG(salary),2) AS "avg_salary"
+	FROM employees;
+
+7. Đưa ra danh sách job_id và số lượng nhân viên tương ứng.
+
+SELECT job_id, COUNT(employee_id) AS "count_employee"
+	FROM employees
+	GROUP BY job_id;
+
+8. Đưa ra khoảng cách lương giữa mức lương cao nhất và thấp nhất.
+
+SELECT ROUND((MAX(salary)-MIN(salary)),2) AS "Diference"
+	FROM employees;
+9. Tìm manager_id và mức lương thấp nhất trả cho vị trí manger_id.
+
+SELECT DISTINCT e1.manager_id, e2.salary
+	FROM employees e1
+	JOIN employees e2 ON e2.employee_id = e1.manager_id
+	WHERE e2.salary = (SELECT MIN(e4.salary)
+		FROM employees e3
+		JOIN employees e4 ON e4.employee_id = e3.manager_id); 
+
+10. Đưa ra danh sách department_id và tổng lương ứng với nó.
+
+SELECT DISTINCT e.department_id, ROUND(SUM(e.salary),2) AS "Sum_salary"
+	FROM employees e
+	GROUP BY e.department_id;
+
+11. Đưa ra mức lương trung bình cho mỗi job_id trừ nghề Progammer.
+
+SELECT e.job_id, j.job_title, ROUND(AVG(e.salary),2) AS "avg_salary"
+	FROM employees e
+	JOIN jobs j ON j.job_id = e.job_id
+	WHERE NOT j.job_title = 'Progarmmer'
+	GROUP BY e.job_id, j.job_title;
+
+12. Đưa ra tổng lương, cao nhất, thấp nhất, trung bình của mỗi job_id thuộc về department_id = 90.
+
+SELECT  job_id,
+	ROUND(SUM(salary),2) AS "sum_salary",
+	ROUND(MAX(salary),2) AS "max_salary",
+	ROUND(MIN(salary),2) AS "min_salary",
+	ROUND(AVG(salary),2) AS "avg_salary"
+	FROM employees
+	WHERE department_id = 90
+	GROUP BY job_id;
+
+13. Đưa ra job_id mà mức lương cao nhất của vị trí này lớn hơn hoặc bằng 4000.
+
+SELECT job_id, ROUND(MAX(salary),2) AS "max_salary"
+	FROM employees
+	GROUP BY job_id
+	HAVING MAX(salary) >= 4000;
+
+14. Đưa ra mức lương trung bình của các department có ít hơn 10 nhân viên
+
+SELECT  department_id, ROUND(AVG(salary),2) AS "avg_salary", COUNT(employee_id) AS "count"
+	FROM employees
+	GROUP BY department_id
+	HAVING COUNT(employee_id) < 10;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

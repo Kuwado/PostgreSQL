@@ -1,0 +1,194 @@
+---------------------SUBQUERY--------------------
+
+1. Đưa ra first_name, last_name và lương của những nhân viên mà có mức lương cao hơn nhân viên có last_name là ‘Bull’.
+
+SELECT first_name, last_name, salary
+	FROM employees
+	WHERE salary > (SELECT salary FROM employees 
+	WHERE last_name = 'Bull');
+
+2. Đưa ra first_name, last_name của tất cả các nhân viên làm việc ở department IT.
+
+SELECT e.first_name, e.last_name
+	FROM employees e
+	JOIN departments d ON d.department_id = e.department_id
+	WHERE department_name = 'IT' ;
+
+3. Đưa ra first_name, last_name của tất cả nhân viên mà có quản lý và làm việc tại department ở USA.
+
+SELECT e.first_name, e.last_name, l.country_id, e.manager_id, e.department_id
+	FROM employees e
+	JOIN departments d ON d.department_id = e.department_id
+	JOIN locations l ON l.location_id = d.location_id
+	WHERE l.country_id = 'US' 
+	ORDER BY e.manager_id ASC;
+	
+4. Đưa ra first_name, last_name của nhân viên mà là quản lý.
+
+SELECT e.first_name, e.last_name
+	FROM employees e
+	JOIN employees ee ON e.employee_id = ee.manager_id
+	GROUP BY e.employee_id
+	ORDER BY e.employee_id ASC;
+
+5. Đưa ra first_name, last_name và lương của nhân viên mà mức lương của họ cao hơn mức lương trung bình
+
+SELECT first_name, last_name, salary
+	FROM employees 
+	WHERE salary > (SELECT AVG(salary) FROM employees);
+
+6. Đưa ra first_name, last_name và mức lương của nhân viên mà mức lương bằng mức lương tối thiểu của job grade của họ
+
+SELECT e.first_name, e.last_name, e.salary, j.min_salary
+	FROM employees e
+	LEFT JOIN jobs j ON e.job_id = j.job_id
+	WHERE e.salary = j.min_salary;
+
+7. Đưa ra first_name, last_name và mức lương của nhân viên mà thu nhập nhiều hơn mức lương trung bình và làm việc trong một trong các department IT
+
+SELECT e.first_name, e.last_name, e.salary
+	FROM employees e
+	LEFT JOIN departments d ON e.department_id = d.department_id	
+	WHERE d.department_name = 'IT' 
+	AND e.salary > (SELECT AVG(salary) FROM employees);
+
+8. Đưa ra first_name, last_name và mức lương của nhân viên mà thu nhập cao hơn mức lương của Mr. Bell
+
+SELECT first_name, last_name, salary
+	FROM employees 
+	WHERE salary > (SELECT salary FROM employees WHERE last_name = 'Bell' );
+
+9. Đưa ra first_name, last_name và mức lương của nhân viên mà thu nhập bằng mức lương tối thiểu của tất cả các departments
+
+SELECT first_name, last_name, salary
+	FROM employees
+	WHERE salary = (SELECT MIN(salary) FROM employees);
+
+10. Đưa ra first_name, last_name và mức lương của nhân viên mà mức lương lớn hơn mức lương tối thiểu của tất cả các departments
+
+SELECT first_name, last_name, salary
+	FROM employees
+	WHERE salary > (SELECT MIN(salary) FROM employees);
+
+11. Đưa ra first_name, last_name và mức lương của nhân viên mà mức lương cao hơn mức lương của những người có JOB_ID = ‘SH_CLERK’. Sắp xếp mức lương từ thấp nhất tới cao nhất
+
+SELECT first_name, last_name, salary
+	FROM employees
+	WHERE salary > (SELECT MAX(salary) FROM employees WHERE job_id = 'SH_CLERK')
+	ORDER BY salary ASC;
+
+12. Đưa ra first_name, last_name của nhân viên mà không phải supervisors.
+
+
+13. Đưa ra employee ID, first_name, last_name, department name của tất cả các nhân viên.
+
+
+SELECT e.employee_id, e.first_name, e.last_name, d.department_name
+	FROM employees e
+	LEFT JOIN departments d ON e.department_id = d.department_id;
+
+
+14. Đưa ra employee ID, first_name, last_name, department name của tất cả các nhân viên mà mức lương cao hơn mức lương trung bình ở department mà họ làm việc.
+
+SELECT e.employee_id, e.first_name, e.last_name, d.department_name, e.salary
+	FROM employees e
+	LEFT JOIN departments d ON e.department_id = d.department_id
+	WHERE e.salary > (SELECT AVG(salary) FROM employees WHERE department_id = e.department_id);
+
+15. Đưa ra các bản ghi có thứ tự lẻ từ bảng employees.
+
+SELECT *
+	FROM employees
+	WHERE employee_id % 2 = 1;	
+
+16. Đưa ra mức lương cao thứ 5 trong bảng employees.
+
+SELECT DISTINCT salary
+	FROM employees
+	ORDER BY salary DESC
+	OFFSET 4 
+	LIMIT 1;
+
+17. Đưa ra mức lương thấp thứ 4 trong bảng employees.
+
+SELECT DISTINCT salary
+	FROM employees
+	ORDER BY salary ASC
+	OFFSET 3 
+	LIMIT 1;
+
+18. Lấy 10 bản ghi cuối cùng của 1 bảng bất kỳ.
+
+SELECT * 
+	FROM employees
+	ORDER BY employee_id DESC
+	LIMIT 10;
+
+19. Đưa ra danh sách department ID và tên của tất cả các departments mà không có nhân viên nào
+
+SELECT department_id, department_name
+	FROM departments
+	WHERE department_id NOT IN (SELECT department_id FROM employees);
+
+20. Đưa ra 3 mức lương cao nhất
+
+SELECT DISTINCT salary
+	FROM employees
+	ORDER BY salary DESC
+	LIMIT 3;	
+
+21. Đưa ra 3 mức lương thấp nhất
+
+SELECT DISTINCT salary
+	FROM employees
+	ORDER BY salary ASC
+	LIMIT 3;
+
+22. Đưa ra mức lương cao thứ n trong bảng employees.
+
+SELECT DISTINCT salary
+	FROM employees
+	ORDER BY salary DESC
+	OFFSET n-1 LIMIT 1;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

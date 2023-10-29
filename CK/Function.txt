@@ -1,0 +1,93 @@
+CREATE OR REPLACE FUNCTION add_book(
+	book_id INT,
+	book_name VARCHAR(100),
+	location VARCHAR(30),
+	quantity INT,
+	publishing_year VARCHAR(4),
+	language VARCHAR(20)
+) RETURNS VOID AS $$
+BEGIN
+	INSERT INTO books (book_id, book_name, location, quantity, publishing_year, language)
+	VALUES (book_id, book_name, location, quantity, publishing_year, language);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION clear_book_field(book_id INT, field_name VARCHAR) RETURNS VOID AS $$
+BEGIN
+	EXECUTE format('UPDATE books SET %I = DEFAULT WHERE book_id = %s', field_name, book_id);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION update_book(
+	book_id INT,
+	book_name VARCHAR(100),
+	location VARCHAR(30),
+	quantity INT,
+	publishing_year VARCHAR(4),
+	language VARCHAR(20)
+) RETURNS VOID AS $$
+BEGIN
+	UPDATE books
+	SET
+    	book_name = COALESCE(book_name, books.book_name),
+    	location = COALESCE(location, books.location),
+    	quantity = COALESCE(quantity, books.quantity),
+    	publishing_year = COALESCE(publishing_year, books.publishing_year),
+    	language = COALESCE(language, books.language)
+	WHERE book_id = book_id;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION add_user(
+	user_id INT,
+	u_first_name VARCHAR(30),
+	u_last_name VARCHAR(30),
+	u_date_of_birth DATE,
+	u_gmail VARCHAR(30),
+	u_phone_number VARCHAR(30),
+	address VARCHAR(100),
+	cccd VARCHAR(20)
+) RETURNS VOID AS $$
+BEGIN
+	INSERT INTO users (user_id, u_first_name, u_last_name, u_date_of_birth, u_gmail, u_phone_number, address, cccd)
+	VALUES (user_id, u_first_name, u_last_name, u_date_of_birth, u_gmail, u_phone_number, address, cccd);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION delete_user(user_id INT) RETURNS VOID AS $$
+BEGIN
+	DELETE FROM users WHERE user_id = delete_user.user_id;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION update_user(
+	user_id INT,
+	u_first_name VARCHAR(30),
+	u_last_name VARCHAR(30),
+	u_date_of_birth DATE,
+	u_gmail VARCHAR(30),
+	u_phone_number VARCHAR(30),
+	address VARCHAR(100),
+	cccd VARCHAR(20)
+) RETURNS VOID AS $$
+BEGIN
+	UPDATE users
+	SET
+    	u_first_name = COALESCE(u_first_name, users.u_first_name),
+    	u_last_name = COALESCE(u_last_name, users.u_last_name),
+    	u_date_of_birth = COALESCE(u_date_of_birth, users.u_date_of_birth),
+    	u_gmail = COALESCE(u_gmail, users.u_gmail),
+    	u_phone_number = COALESCE(u_phone_number, users.u_phone_number),
+    	address = COALESCE(address, users.address),
+    	cccd = COALESCE(cccd, users.cccd)
+	WHERE user_id = update_user.user_id;
+END;
+$$ LANGUAGE plpgsql; 
+
+
+
+
+
